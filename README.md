@@ -31,8 +31,7 @@ The same configuration therefore always produces the same trace, which makes
 protocol comparisons repeatable and the behaviour testable.
 
 <p align="center">
-  <img src="docs/images/arq-protocol-simulator-overview.png
-  " alt="Conceptual overview: a sender's sliding window transmits frames through an unreliable FIFO channel with propagation delay and frame or ACK loss to a receiver that returns ACKs; a Go-Back-N vs Selective Repeat comparison; and the engine flow from configuration to an event-driven simulation to the event trace and metrics" width="900">
+  <img src="docs/images/arq-protocol-simulator-overview.png" alt="Conceptual overview: a sender's sliding window transmits frames through an unreliable FIFO channel with propagation delay and frame or ACK loss to a receiver that returns ACKs; a Go-Back-N vs Selective Repeat comparison; and the engine flow from configuration to an event-driven simulation to the event trace and metrics" width="900">
 </p>
 
 <p align="center">
