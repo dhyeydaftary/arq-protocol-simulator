@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "arq-protocol-simulator"
+version = "0.1.0"
+description = "Deterministic event-driven simulator for Go-Back-N and Selective Repeat ARQ"
+requires-python = ">=3.10"
+dependencies = []  # the engine uses only the Python standard library
+
+[project.optional-dependencies]
+api = ["flask>=2.3"]                  # only the HTTP API (arq_api) needs Flask
+dev = ["pytest>=7", "flask>=2.3"]
+
+[tool.setuptools]
+packages = ["arq", "arq.protocols", "arq_api"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

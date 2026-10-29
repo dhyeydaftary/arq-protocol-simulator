@@ -1,0 +1,188 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 860" width="1200" height="860" role="img" aria-labelledby="title desc">
+  <title id="title">ARQ Protocol Simulator overview</title>
+  <desc id="desc">Conceptual overview: a sender transmits frames through an unreliable FIFO channel with propagation delay and frame or ACK loss to a receiver that returns acknowledgements; a comparison of Go-Back-N and Selective Repeat; and the simulation flow from configuration through an event-driven simulation to an event trace and metrics.</desc>
+
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F5F3FF"/>
+    </linearGradient>
+    <marker id="arrowIndigo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4F46E5"/>
+    </marker>
+    <marker id="arrowTeal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#0D9488"/>
+    </marker>
+    <marker id="arrowSlate" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#64748B"/>
+    </marker>
+  </defs>
+
+  <style>
+    text { font-family: 'Segoe UI', -apple-system, 'Helvetica Neue', Arial, sans-serif; }
+    .title { font-size: 44px; font-weight: 700; fill: #1E1B4B; }
+    .subtitle { font-size: 20px; fill: #475569; }
+    .chip { font-size: 15px; font-weight: 600; }
+    .label { font-size: 14px; font-weight: 700; letter-spacing: 1.5px; fill: #6366F1; }
+    .h { font-size: 19px; font-weight: 700; fill: #1E1B4B; }
+    .body { font-size: 15px; fill: #334155; }
+    .small { font-size: 14px; fill: #64748B; }
+    .cell { font-size: 15px; fill: #1E293B; }
+    .frame { font-size: 15px; font-weight: 600; }
+    .mono { font-family: Consolas, 'Cascadia Code', 'SFMono-Regular', Menlo, monospace; font-size: 14px; fill: #3730A3; }
+  </style>
+
+  <!-- Background -->
+  <rect width="1200" height="860" fill="url(#bg)"/>
+
+  <!-- A. Title -->
+  <text x="600" y="80" text-anchor="middle" class="title"><tspan fill="#4F46E5">ARQ</tspan> Protocol Simulator</text>
+  <text x="600" y="116" text-anchor="middle" class="subtitle">A deterministic, event-driven simulator for Go-Back-N and Selective Repeat ARQ</text>
+
+  <g>
+    <rect x="180" y="138" width="223" height="32" rx="16" fill="#EEF2FF" stroke="#A5B4FC"/>
+    <text x="291.5" y="159" text-anchor="middle" class="chip" fill="#3730A3">Python simulation engine</text>
+    <rect x="419" y="138" width="140" height="32" rx="16" fill="#F0FDFA" stroke="#5EEAD4"/>
+    <text x="489" y="159" text-anchor="middle" class="chip" fill="#0F766E">Flask JSON API</text>
+    <rect x="575" y="138" width="232" height="32" rx="16" fill="#EFF6FF" stroke="#93C5FD"/>
+    <text x="691" y="159" text-anchor="middle" class="chip" fill="#1D4ED8">Reproducible event traces</text>
+    <rect x="823" y="138" width="198" height="32" rx="16" fill="#FDF2F8" stroke="#F9A8D4"/>
+    <text x="922" y="159" text-anchor="middle" class="chip" fill="#BE185D">Web frontend: planned</text>
+  </g>
+
+  <!-- B. Sender -> Channel -> Receiver -->
+  <rect x="40" y="196" width="1120" height="250" rx="20" fill="#FFFFFF" stroke="#E0E7FF"/>
+  <text x="64" y="225" class="label">TRANSMISSION MODEL</text>
+
+  <!-- Sender -->
+  <rect x="70" y="244" width="300" height="176" rx="16" fill="#F5F7FF" stroke="#C7D2FE"/>
+  <text x="220" y="273" text-anchor="middle" class="h">Sender</text>
+  <rect x="170" y="290" width="188" height="50" rx="10" fill="#E0E7FF" stroke="#6366F1" stroke-dasharray="5 4"/>
+  <g class="frame" text-anchor="middle">
+    <rect x="84" y="297" width="36" height="36" rx="8" fill="#CCFBF1" stroke="#14B8A6"/>
+    <text x="102" y="321" fill="#0F766E">0</text>
+    <rect x="128" y="297" width="36" height="36" rx="8" fill="#CCFBF1" stroke="#14B8A6"/>
+    <text x="146" y="321" fill="#0F766E">1</text>
+    <rect x="176" y="297" width="36" height="36" rx="8" fill="#6366F1"/>
+    <text x="194" y="321" fill="#FFFFFF">2</text>
+    <rect x="220" y="297" width="36" height="36" rx="8" fill="#6366F1"/>
+    <text x="238" y="321" fill="#FFFFFF">3</text>
+    <rect x="264" y="297" width="36" height="36" rx="8" fill="#6366F1"/>
+    <text x="282" y="321" fill="#FFFFFF">4</text>
+    <rect x="308" y="297" width="36" height="36" rx="8" fill="#6366F1"/>
+    <text x="326" y="321" fill="#FFFFFF">5</text>
+  </g>
+  <text x="220" y="366" text-anchor="middle" class="body">Sliding window of outstanding frames</text>
+  <text x="220" y="390" text-anchor="middle" class="small">Sequence numbers wrap mod 2^seq_bits</text>
+  <circle cx="104" cy="406" r="5" fill="#CCFBF1" stroke="#14B8A6"/>
+  <text x="114" y="410" class="small">acknowledged</text>
+  <circle cx="214" cy="406" r="5" fill="#6366F1"/>
+  <text x="224" y="410" class="small">sent, awaiting ACK</text>
+
+  <!-- Arrows sender <-> channel -->
+  <line x1="372" y1="300" x2="446" y2="300" stroke="#4F46E5" stroke-width="2.5" marker-end="url(#arrowIndigo)"/>
+  <text x="409" y="290" text-anchor="middle" class="small">frames</text>
+  <line x1="446" y1="372" x2="372" y2="372" stroke="#0D9488" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#arrowTeal)"/>
+  <text x="409" y="362" text-anchor="middle" class="small">ACKs</text>
+
+  <!-- Channel -->
+  <rect x="450" y="244" width="300" height="176" rx="16" fill="#F0FDFA" stroke="#99F6E4"/>
+  <text x="600" y="273" text-anchor="middle" class="h">Unreliable channel</text>
+  <text x="476" y="304" class="body">Propagation delay of P ticks</text>
+  <circle cx="483" cy="324" r="9" fill="#FCE7F3" stroke="#EC4899"/>
+  <path d="M479,320 L487,328 M487,320 L479,328" stroke="#DB2777" stroke-width="2" stroke-linecap="round"/>
+  <text x="498" y="329" class="body">Frames and ACKs can be lost</text>
+  <text x="476" y="354" class="body">FIFO: arrivals keep send order</text>
+  <text x="600" y="384" text-anchor="middle" class="small">Frame sent at tick t arrives at t+1+P</text>
+  <text x="600" y="404" text-anchor="middle" class="small">ACK takes P more ticks · RTT = 1+2P</text>
+
+  <!-- Arrows channel <-> receiver -->
+  <line x1="752" y1="300" x2="826" y2="300" stroke="#4F46E5" stroke-width="2.5" marker-end="url(#arrowIndigo)"/>
+  <text x="789" y="290" text-anchor="middle" class="small">frames</text>
+  <line x1="826" y1="372" x2="752" y2="372" stroke="#0D9488" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#arrowTeal)"/>
+  <text x="789" y="362" text-anchor="middle" class="small">ACKs</text>
+
+  <!-- Receiver -->
+  <rect x="830" y="244" width="300" height="176" rx="16" fill="#F5F7FF" stroke="#C7D2FE"/>
+  <text x="980" y="273" text-anchor="middle" class="h">Receiver</text>
+  <text x="856" y="304" class="body">Accepts or discards each frame</text>
+  <text x="856" y="329" class="body">Delivers frames in order</text>
+  <text x="856" y="354" class="body">Sends ACKs back to the sender</text>
+  <text x="980" y="384" text-anchor="middle" class="small">Never delivers the same frame twice</text>
+  <text x="980" y="404" text-anchor="middle" class="small">No fast retransmit on duplicate ACKs</text>
+
+  <!-- C. Go-Back-N vs Selective Repeat -->
+  <rect x="40" y="470" width="640" height="360" rx="20" fill="#FFFFFF" stroke="#E0E7FF"/>
+  <text x="64" y="499" class="label">GO-BACK-N VS SELECTIVE REPEAT</text>
+
+  <rect x="64" y="514" width="288" height="36" rx="10" fill="#EEF2FF" stroke="#C7D2FE"/>
+  <text x="208" y="538" text-anchor="middle" class="h" fill="#3730A3">Go-Back-N</text>
+  <rect x="368" y="514" width="288" height="36" rx="10" fill="#F0FDFA" stroke="#99F6E4"/>
+  <text x="512" y="538" text-anchor="middle" class="h">Selective Repeat</text>
+
+  <g>
+    <rect x="64" y="560" width="288" height="56" rx="10" fill="#FAFAFF" stroke="#E0E7FF"/>
+    <text x="80" y="593" class="cell">Cumulative acknowledgements</text>
+    <rect x="368" y="560" width="288" height="56" rx="10" fill="#FAFAFF" stroke="#E0E7FF"/>
+    <text x="384" y="593" class="cell">Individual acknowledgements</text>
+
+    <rect x="64" y="624" width="288" height="56" rx="10" fill="#FAFAFF" stroke="#E0E7FF"/>
+    <text x="80" y="647" class="cell">One timer for the oldest</text>
+    <text x="80" y="667" class="cell">outstanding frame</text>
+    <rect x="368" y="624" width="288" height="56" rx="10" fill="#FAFAFF" stroke="#E0E7FF"/>
+    <text x="384" y="647" class="cell">One timer per</text>
+    <text x="384" y="667" class="cell">outstanding frame</text>
+
+    <rect x="64" y="688" width="288" height="56" rx="10" fill="#FAFAFF" stroke="#E0E7FF"/>
+    <text x="80" y="711" class="cell">Timeout: retransmits every</text>
+    <text x="80" y="731" class="cell">outstanding frame</text>
+    <rect x="368" y="688" width="288" height="56" rx="10" fill="#FAFAFF" stroke="#E0E7FF"/>
+    <text x="384" y="711" class="cell">Timeout: retransmits only</text>
+    <text x="384" y="731" class="cell">the timed-out frame</text>
+
+    <rect x="64" y="752" width="288" height="56" rx="10" fill="#FAFAFF" stroke="#E0E7FF"/>
+    <text x="80" y="775" class="cell">Receiver discards</text>
+    <text x="80" y="795" class="cell">out-of-order frames</text>
+    <rect x="368" y="752" width="288" height="56" rx="10" fill="#FAFAFF" stroke="#E0E7FF"/>
+    <text x="384" y="775" class="cell">Receiver buffers out-of-order</text>
+    <text x="384" y="795" class="cell">frames within its window</text>
+  </g>
+
+  <!-- D. Simulation engine and outputs -->
+  <rect x="700" y="470" width="460" height="360" rx="20" fill="#FFFFFF" stroke="#E0E7FF"/>
+  <text x="724" y="499" class="label">SIMULATION ENGINE</text>
+
+  <rect x="724" y="514" width="120" height="78" rx="12" fill="#F5F3FF" stroke="#C4B5FD"/>
+  <text x="784" y="547" text-anchor="middle" class="body" font-size="14.5" font-weight="700" fill="#4C1D95">Configuration</text>
+  <text x="784" y="569" text-anchor="middle" class="small">validated input</text>
+
+  <line x1="846" y1="553" x2="866" y2="553" stroke="#64748B" stroke-width="2" marker-end="url(#arrowSlate)"/>
+
+  <rect x="870" y="514" width="120" height="78" rx="12" fill="#EFF6FF" stroke="#93C5FD"/>
+  <text x="930" y="540" text-anchor="middle" class="body" font-weight="700" fill="#1E3A8A">Event-driven</text>
+  <text x="930" y="559" text-anchor="middle" class="body" font-weight="700" fill="#1E3A8A">simulation</text>
+  <text x="930" y="579" text-anchor="middle" class="small">GBN or SR</text>
+
+  <line x1="992" y1="553" x2="1012" y2="553" stroke="#64748B" stroke-width="2" marker-end="url(#arrowSlate)"/>
+
+  <rect x="1016" y="514" width="120" height="78" rx="12" fill="#F0FDFA" stroke="#5EEAD4"/>
+  <text x="1076" y="547" text-anchor="middle" class="body" font-weight="700" fill="#134E4A">Trace and</text>
+  <text x="1076" y="566" text-anchor="middle" class="body" font-weight="700" fill="#134E4A">metrics</text>
+
+  <text x="724" y="626" class="body" font-weight="700" fill="#1E1B4B">Outputs</text>
+  <g class="body">
+    <circle cx="730" cy="645" r="3.5" fill="#14B8A6"/>
+    <text x="742" y="650">Step-by-step event trace</text>
+    <circle cx="730" cy="669" r="3.5" fill="#14B8A6"/>
+    <text x="742" y="674">Transmissions and retransmissions</text>
+    <circle cx="730" cy="693" r="3.5" fill="#14B8A6"/>
+    <text x="742" y="698">Completion status</text>
+    <circle cx="730" cy="717" r="3.5" fill="#14B8A6"/>
+    <text x="742" y="722">Completion time</text>
+    <circle cx="730" cy="741" r="3.5" fill="#14B8A6"/>
+    <text x="742" y="746">Goodput</text>
+  </g>
+
+  <rect x="724" y="764" width="412" height="44" rx="10" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="740" y="791" class="mono">run_simulation(SimulationConfig(protocol="sr"))</text>
+</svg>
